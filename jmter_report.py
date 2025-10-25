@@ -25,6 +25,9 @@ class JMeterReportGenerator:
             self.df = pd.read_csv(self.csv_file)
             # Convert timestamp to datetime
             self.df['timeStamp'] = pd.to_datetime(self.df['timeStamp'], unit='ms')
+            # Ensure elapsed is numeric and convert from milliseconds to seconds
+            if 'elapsed' in self.df.columns:
+                self.df['elapsed'] = pd.to_numeric(self.df['elapsed'], errors='coerce') / 1000.0
             return True
         except Exception as e:
             print(f"Error reading CSV file: {str(e)}")
@@ -42,7 +45,7 @@ class JMeterReportGenerator:
         fig.update_layout(
             title='Response Time Over Time',
             xaxis_title='Time',
-            yaxis_title='Response Time (ms)',
+            yaxis_title='Response Time (s)',
             template='plotly_white'
         )
         return fig
@@ -82,14 +85,14 @@ class JMeterReportGenerator:
         """Calculate basic statistics"""
         stats = {
             'Total Requests': len(self.df),
-            'Average Response Time': round(self.df['elapsed'].mean(), 2),
-            'Median Response Time': round(self.df['elapsed'].median(), 2),
-            'Min Response Time': round(self.df['elapsed'].min(), 2),
-            'Max Response Time': round(self.df['elapsed'].max(), 2),
-            'Success Rate': round((self.df['success'].mean() * 100), 2),
-            '90th Percentile': round(self.df['elapsed'].quantile(0.90), 2),
-            '95th Percentile': round(self.df['elapsed'].quantile(0.95), 2),
-            '99th Percentile': round(self.df['elapsed'].quantile(0.99), 2)
+            'Average Response Time (s)': round(self.df['elapsed'].mean(), 2),
+            'Median Response Time (s)': round(self.df['elapsed'].median(), 2),
+            'Min Response Time (s)': round(self.df['elapsed'].min(), 2),
+            'Max Response Time (s)': round(self.df['elapsed'].max(), 2),
+            'Success Rate (%)': round((self.df['success'].mean() * 100), 2),
+            '90th Percentile (s)': round(self.df['elapsed'].quantile(0.90), 2),
+            '95th Percentile (s)': round(self.df['elapsed'].quantile(0.95), 2),
+            '99th Percentile (s)': round(self.df['elapsed'].quantile(0.99), 2)
         }
         return stats
 
